@@ -1,0 +1,119 @@
+{% extends 'base.html' %}
+
+{% block title %}Company Dashboard | RojGari{% endblock %}
+
+{% block content %}
+<div class="mx-auto max-w-4xl px-4 py-8 sm:px-6 lg:py-10">
+  <div class="rounded-2xl border border-[#dbe5f5] bg-white p-5 shadow-sm shadow-blue-100/60 sm:p-6">
+
+    <!-- Header -->
+    <div class="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+      <div class="flex items-center gap-4">
+        {% if profile.logo %}
+          <img src="{{ profile.logo.url }}" alt="Logo"
+               class="h-20 w-20 shrink-0 rounded-xl bg-white object-contain ring-1 ring-slate-100" />
+        {% else %}
+          <div class="flex h-20 w-20 shrink-0 items-center justify-center rounded-xl bg-[#cfe3fd] text-2xl font-bold text-[#1a6fd9]">
+            {{ profile.company_name|first|upper }}
+          </div>
+        {% endif %}
+        <div class="min-w-0">
+          <h1 class="text-xl font-extrabold tracking-tight text-slate-900 sm:text-2xl">{{ profile.company_name }}</h1>
+          {% if profile.tagline %}
+            <p class="text-sm text-slate-500">{{ profile.tagline }}</p>
+          {% endif %}
+          {% if profile.is_verified %}
+            <span class="mt-1 inline-block rounded-full bg-green-50 px-2.5 py-0.5 text-xs font-semibold text-green-700">Verified</span>
+          {% else %}
+            <span class="mt-1 inline-block rounded-full bg-amber-50 px-2.5 py-0.5 text-xs font-semibold text-amber-700">Verification pending</span>
+          {% endif %}
+        </div>
+      </div>
+
+      <div class="flex flex-wrap gap-2">
+        <a href="{% url 'jobs:mine' %}"
+           class="rounded-lg border border-[#cfd8e8] px-4 py-2 text-sm font-semibold text-slate-700 transition hover:bg-[#eef3fb]">
+          My jobs
+        </a>
+        <a href="{% url 'jobs:create' %}"
+           class="rounded-lg border border-blue-200 px-4 py-2 text-sm font-semibold text-blue-600 transition hover:bg-blue-50">
+          Post a job
+        </a>
+        <a href="{% url 'dashboard:company_edit' %}"
+           class="rounded-lg bg-blue-600 px-4 py-2 text-sm font-semibold text-white transition hover:bg-blue-700">
+          Edit profile
+        </a>
+      </div>
+    </div>
+
+    {% if not profile.is_verified %}
+      <div class="mt-5 rounded-xl border border-amber-200 bg-amber-50 p-3 text-sm text-amber-800">
+        Your company must be verified before you can post jobs. Complete your profile and
+        <span class="font-semibold">PAN number ra registration document</span>
+        upload the registration document. An admin will verify it.
+      </div>
+    {% endif %}
+
+    <!-- About -->
+    <div class="mt-6 rounded-xl bg-[#eef3fb] p-4">
+      <p class="text-xs font-semibold uppercase tracking-wide text-slate-400">About</p>
+      <p class="mt-1 text-sm leading-relaxed text-slate-700">{{ profile.description|default:"-" }}</p>
+    </div>
+
+    <!-- Details -->
+    <dl class="mt-4 grid gap-3 text-sm sm:grid-cols-2">
+      <div class="rounded-xl border border-[#dbe5f5] p-4">
+        <dt class="text-xs font-semibold uppercase tracking-wide text-slate-400">Industry</dt>
+        <dd class="mt-1 font-medium text-slate-800">{{ profile.get_industry_display|default:"-" }}</dd>
+      </div>
+      <div class="rounded-xl border border-[#dbe5f5] p-4">
+        <dt class="text-xs font-semibold uppercase tracking-wide text-slate-400">Company size</dt>
+        <dd class="mt-1 font-medium text-slate-800">{{ profile.get_company_size_display|default:"-" }}</dd>
+      </div>
+      <div class="rounded-xl border border-[#dbe5f5] p-4">
+        <dt class="text-xs font-semibold uppercase tracking-wide text-slate-400">Established</dt>
+        <dd class="mt-1 font-medium text-slate-800">{{ profile.established_year|default:"-" }}</dd>
+      </div>
+      <div class="rounded-xl border border-[#dbe5f5] p-4">
+        <dt class="text-xs font-semibold uppercase tracking-wide text-slate-400">Location</dt>
+        <dd class="mt-1 font-medium text-slate-800">{{ profile.location|default:"-" }}</dd>
+      </div>
+      <div class="rounded-xl border border-[#dbe5f5] p-4">
+        <dt class="text-xs font-semibold uppercase tracking-wide text-slate-400">Website</dt>
+        <dd class="mt-1 break-all">
+          {% if profile.website %}
+            <a href="{{ profile.website }}" target="_blank" rel="noopener noreferrer"
+               class="font-semibold text-blue-600 hover:underline">{{ profile.website }}</a>
+          {% else %}
+            <span class="font-medium text-slate-800">-</span>
+          {% endif %}
+        </dd>
+      </div>
+      <div class="rounded-xl border border-[#dbe5f5] p-4">
+        <dt class="text-xs font-semibold uppercase tracking-wide text-slate-400">Contact email</dt>
+        <dd class="mt-1 break-all font-medium text-slate-800">{{ profile.contact_email|default:"-" }}</dd>
+      </div>
+      <div class="rounded-xl border border-[#dbe5f5] p-4">
+        <dt class="text-xs font-semibold uppercase tracking-wide text-slate-400">Contact phone</dt>
+        <dd class="mt-1 font-medium text-slate-800">{{ profile.contact_phone|default:"-" }}</dd>
+      </div>
+      <div class="rounded-xl border border-[#dbe5f5] p-4">
+        <dt class="text-xs font-semibold uppercase tracking-wide text-slate-400">PAN number</dt>
+        <dd class="mt-1 font-medium text-slate-800">{{ profile.pan_number|default:"-" }}</dd>
+      </div>
+      <div class="rounded-xl border border-[#dbe5f5] p-4 sm:col-span-2">
+        <dt class="text-xs font-semibold uppercase tracking-wide text-slate-400">Registration document</dt>
+        <dd class="mt-1">
+          {% if profile.registration_document %}
+            <a href="{% url 'core:company_document' profile.pk %}"
+               class="font-semibold text-blue-600 hover:underline">View document</a>
+          {% else %}
+            <span class="font-medium text-slate-800">-</span>
+          {% endif %}
+        </dd>
+      </div>
+    </dl>
+
+  </div>
+</div>
+{% endblock %}

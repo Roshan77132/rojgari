@@ -1,0 +1,66 @@
+{% load static %}
+<footer class="bg-slate-900 text-slate-300">
+  <div class="mx-auto max-w-6xl px-4 py-12 sm:px-6 lg:py-14">
+    <div class="grid gap-10 sm:grid-cols-2 lg:grid-cols-12">
+
+      <!-- Brand -->
+      <div class="sm:col-span-2 lg:col-span-5">
+        <a href="{% url 'core:home' %}" class="inline-flex items-center gap-3">
+          <img src="{% static 'images/logo.png' %}" alt="RojGari" class="h-11 w-11 rounded-full object-cover ring-1 ring-white/20" />
+          <span class="text-2xl font-extrabold tracking-tight text-white">Roj<span class="text-blue-400">Gari</span></span>
+        </a>
+        <p class="mt-4 max-w-md text-sm leading-relaxed text-slate-400">
+          RojGari connects job seekers and verified employers across Nepal. Search jobs,
+          apply with a single profile, and hire with confidence.
+        </p>
+        <a href="{% url 'core:about' %}" class="mt-4 inline-block text-sm font-semibold text-blue-400 hover:text-blue-300">Read more &rarr;</a>
+      </div>
+
+      <!-- For job seekers -->
+      <div class="lg:col-span-2">
+        <h3 class="text-xs font-bold uppercase tracking-widest text-white">For job seekers</h3>
+        <ul class="mt-4 space-y-2.5 text-sm">
+          <li><a href="{% url 'jobs:list' %}" class="text-slate-400 transition hover:text-white">Browse jobs</a></li>
+          {% if user.is_authenticated and user.role == 'jobseeker' %}
+            <li><a href="{% url 'jobs:saved_list' %}" class="text-slate-400 transition hover:text-white">Saved jobs</a></li>
+            <li><a href="{% url 'applications:mine' %}" class="text-slate-400 transition hover:text-white">My applications</a></li>
+          {% elif not user.is_authenticated %}
+            <li><a href="{% url 'accounts:register' %}" class="text-slate-400 transition hover:text-white">Create an account</a></li>
+          {% endif %}
+        </ul>
+      </div>
+
+      <!-- For employers -->
+      <div class="lg:col-span-2">
+        <h3 class="text-xs font-bold uppercase tracking-widest text-white">For employers</h3>
+        <ul class="mt-4 space-y-2.5 text-sm">
+          {% if user.is_authenticated and user.role == 'company' %}
+            <li><a href="{% url 'jobs:create' %}" class="text-slate-400 transition hover:text-white">Post a job</a></li>
+            <li><a href="{% url 'jobs:mine' %}" class="text-slate-400 transition hover:text-white">My jobs</a></li>
+          {% elif not user.is_authenticated %}
+            <li><a href="{% url 'accounts:register' %}" class="text-slate-400 transition hover:text-white">Register your company</a></li>
+            <li><a href="{% url 'accounts:login' %}" class="text-slate-400 transition hover:text-white">Employer login</a></li>
+          {% else %}
+            <li><a href="{% url 'core:about' %}" class="text-slate-400 transition hover:text-white">How hiring works</a></li>
+          {% endif %}
+        </ul>
+      </div>
+
+      <!-- Company -->
+      <div class="lg:col-span-3">
+        <h3 class="text-xs font-bold uppercase tracking-widest text-white">RojGari</h3>
+        <ul class="mt-4 space-y-2.5 text-sm">
+          <li><a href="{% url 'core:about' %}" class="text-slate-400 transition hover:text-white">About us</a></li>
+          {% if user.is_authenticated %}
+            <li><a href="{% url 'dashboard:home' %}" class="text-slate-400 transition hover:text-white">Dashboard</a></li>
+            <li><a href="{% url 'notifications:list' %}" class="text-slate-400 transition hover:text-white">Notifications</a></li>
+          {% else %}
+            <li><a href="{% url 'accounts:login' %}" class="text-slate-400 transition hover:text-white">Login</a></li>
+          {% endif %}
+        </ul>
+      </div>
+
+    </div>
+  </div>
+  </div>
+</footer>

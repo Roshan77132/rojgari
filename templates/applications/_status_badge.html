@@ -1,0 +1,9 @@
+{% if application.status == 'applied' %}
+  <span class="rounded-full bg-[#cfe3fd] px-3 py-1 text-xs font-semibold text-[#1a6fd9]">{{ application.get_status_display }}</span>
+{% elif application.status == 'shortlisted' %}
+  <span class="rounded-full bg-amber-50 px-3 py-1 text-xs font-semibold text-amber-700">{{ application.get_status_display }}</span>
+{% elif application.status == 'hired' %}
+  <span class="rounded-full bg-green-50 px-3 py-1 text-xs font-semibold text-green-700">{{ application.get_status_display }}</span>
+{% else %}
+  <span class="rounded-full bg-red-50 px-3 py-1 text-xs font-semibold text-red-600">{{ application.get_status_display }}</span>
+{% endif %}

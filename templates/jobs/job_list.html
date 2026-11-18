@@ -1,0 +1,133 @@
+{% extends 'base.html' %}
+
+{% block title %}Jobs | RojGari{% endblock %}
+
+{% block content %}
+<div class="mx-auto max-w-6xl px-4 py-8 sm:px-6 lg:py-10">
+
+  <!-- Heading -->
+  <div class="flex flex-wrap items-end justify-between gap-2">
+    <div>
+      <h1 class="text-2xl font-extrabold tracking-tight text-slate-900 sm:text-3xl">Latest jobs</h1>
+      <p class="mt-1 text-sm text-slate-500">{{ total }} open job{{ total|pluralize }}</p>
+    </div>
+  </div>
+
+  <!-- Search / filter -->
+  <form method="get" class="mt-6 grid gap-3 rounded-2xl border border-[#dbe5f5] bg-white p-4 shadow-sm shadow-blue-100/60 sm:grid-cols-2 lg:grid-cols-3">
+    <input type="text" name="q" value="{{ filters.q }}" placeholder="Title, company, skill"
+           class="rounded-lg border border-[#cfd8e8] px-3 py-2.5 text-sm text-slate-800 placeholder:text-slate-400 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500">
+    <input type="text" name="location" value="{{ filters.location }}" placeholder="Location"
+           class="rounded-lg border border-[#cfd8e8] px-3 py-2.5 text-sm text-slate-800 placeholder:text-slate-400 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500">
+    <input type="number" name="min_salary" value="{{ filters.min_salary }}" placeholder="Min salary (NPR)"
+           class="rounded-lg border border-[#cfd8e8] px-3 py-2.5 text-sm text-slate-800 placeholder:text-slate-400 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500">
+
+    <select name="job_type"
+            class="rounded-lg border border-[#cfd8e8] bg-white px-3 py-2.5 text-sm text-slate-800 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500">
+      <option value="">All job types</option>
+      {% for value, label in job_type_choices %}
+        <option value="{{ value }}" {% if filters.job_type == value %}selected{% endif %}>{{ label }}</option>
+      {% endfor %}
+    </select>
+
+    <select name="level"
+            class="rounded-lg border border-[#cfd8e8] bg-white px-3 py-2.5 text-sm text-slate-800 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500">
+      <option value="">All levels</option>
+      {% for value, label in level_choices %}
+        <option value="{{ value }}" {% if filters.level == value %}selected{% endif %}>{{ label }}</option>
+      {% endfor %}
+    </select>
+
+    <select name="sort"
+            class="rounded-lg border border-[#cfd8e8] bg-white px-3 py-2.5 text-sm text-slate-800 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500">
+      {% for value, label in sort_options %}
+        <option value="{{ value }}" {% if filters.sort == value %}selected{% endif %}>{{ label }}</option>
+      {% endfor %}
+    </select>
+
+    <div class="flex items-center gap-3 sm:col-span-2 lg:col-span-3">
+      <button type="submit"
+              class="w-full rounded-lg bg-blue-600 px-6 py-2.5 text-sm font-semibold text-white transition hover:bg-blue-700 sm:w-auto">
+        Search
+      </button>
+      {% if has_filters %}
+        <a href="{% url 'jobs:list' %}" class="shrink-0 text-sm font-medium text-blue-600 hover:underline">Clear filters</a>
+      {% endif %}
+    </div>
+  </form>
+
+  <!-- Job cards -->
+  <div class="mt-6 space-y-4">
+    {% for job in page_obj %}
+    <a href="{{ job.get_absolute_url }}"
+       class="block rounded-2xl border border-[#dbe5f5] bg-white p-4 shadow-sm transition hover:border-blue-300 hover:shadow-md hover:shadow-blue-100 sm:p-5">
+      <div class="flex items-start gap-4">
+        {% if job.company.logo %}
+          <img src="{{ job.company.logo.url }}" alt="{{ job.company.company_name }}"
+               class="h-12 w-12 shrink-0 rounded-lg bg-white object-contain sm:h-14 sm:w-14">
+        {% else %}
+          <div class="flex h-12 w-12 shrink-0 items-center justify-center rounded-lg bg-[#cfe3fd] text-lg font-bold text-[#1a6fd9] sm:h-14 sm:w-14">
+            {{ job.company.company_name|first|upper }}
+          </div>
+        {% endif %}
+
+        <div class="min-w-0 flex-1">
+          <div class="flex items-start justify-between gap-3">
+            <h2 class="truncate text-base font-bold text-slate-900 sm:text-lg">{{ job.title }}</h2>
+            <p class="hidden shrink-0 text-xs text-slate-400 sm:block">Apply by {{ job.deadline|date:"M d, Y" }}</p>
+          </div>
+
+          <p class="text-sm text-slate-500">
+            {{ job.company.company_name }}
+            {% if job.company.is_verified %}<span class="font-medium text-green-600">&middot; Verified</span>{% endif %}
+          </p>
+
+          <div class="mt-3 flex flex-wrap gap-2 text-xs">
+            <span class="rounded-full bg-[#eef3fb] px-3 py-1 text-slate-700">{{ job.location }}</span>
+            <span class="rounded-full bg-[#eef3fb] px-3 py-1 text-slate-700">{{ job.get_job_type_display }}</span>
+            <span class="rounded-full bg-[#eef3fb] px-3 py-1 text-slate-700">{{ job.get_level_display }}</span>
+            <span class="rounded-full bg-[#cfe3fd] px-3 py-1 font-medium text-[#1a6fd9]">{{ job.salary_display }}</span>
+          </div>
+
+          <p class="mt-3 text-xs text-slate-400 sm:hidden">Apply by {{ job.deadline|date:"M d, Y" }}</p>
+        </div>
+      </div>
+    </a>
+    {% empty %}
+    <div class="rounded-2xl border border-[#dbe5f5] bg-white p-10 text-center text-slate-500 shadow-sm">
+      {% if has_filters %}
+        Yo filter ma kunai job bhetiyena.
+      {% else %}
+        No jobs found right now.
+      {% endif %}
+    </div>
+    {% endfor %}
+  </div>
+
+  <!-- Pagination -->
+  {% if page_obj.paginator.num_pages > 1 %}
+  <nav class="mt-8 flex flex-wrap items-center justify-center gap-2 text-sm">
+    {% if page_obj.has_previous %}
+      <a href="?{% if querystring %}{{ querystring }}&{% endif %}page={{ page_obj.previous_page_number }}"
+         class="rounded-lg border border-[#cfd8e8] bg-white px-3 py-1.5 text-slate-700 transition hover:border-blue-300 hover:bg-[#eef3fb]">Previous</a>
+    {% endif %}
+
+    {% for p in page_range %}
+      {% if p == page_obj.number %}
+        <span class="rounded-lg bg-blue-600 px-3 py-1.5 font-semibold text-white">{{ p }}</span>
+      {% elif p == '…' %}
+        <span class="px-2 text-slate-400">&hellip;</span>
+      {% else %}
+        <a href="?{% if querystring %}{{ querystring }}&{% endif %}page={{ p }}"
+           class="rounded-lg border border-[#cfd8e8] bg-white px-3 py-1.5 text-slate-700 transition hover:border-blue-300 hover:bg-[#eef3fb]">{{ p }}</a>
+      {% endif %}
+    {% endfor %}
+
+    {% if page_obj.has_next %}
+      <a href="?{% if querystring %}{{ querystring }}&{% endif %}page={{ page_obj.next_page_number }}"
+         class="rounded-lg border border-[#cfd8e8] bg-white px-3 py-1.5 text-slate-700 transition hover:border-blue-300 hover:bg-[#eef3fb]">Next</a>
+    {% endif %}
+  </nav>
+  {% endif %}
+</div>
+{% endblock %}

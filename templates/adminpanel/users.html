@@ -1,0 +1,44 @@
+{% extends 'adminpanel/_layout.html' %}
+
+{% block panel %}
+<form method="get" class="flex flex-wrap gap-2">
+  <select name="role" class="rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm">
+    <option value="">All</option>
+    <option value="jobseeker" {% if role == 'jobseeker' %}selected{% endif %}>Job seekers</option>
+    <option value="company" {% if role == 'company' %}selected{% endif %}>Companies</option>
+    <option value="staff" {% if role == 'staff' %}selected{% endif %}>Staff</option>
+  </select>
+  <input type="text" name="q" value="{{ q }}" placeholder="Username or email"
+         class="min-w-0 flex-1 rounded-xl border border-slate-200 px-4 py-2 text-sm focus:border-indigo-500 focus:outline-none">
+  <button class="rounded-xl bg-indigo-600 px-5 py-2 text-sm font-semibold text-white hover:bg-indigo-700">Filter</button>
+</form>
+
+<div class="mt-4 overflow-x-auto rounded-2xl bg-white shadow-sm">
+  <table class="w-full text-left text-sm">
+    <thead class="bg-slate-50 text-xs uppercase text-slate-500"><tr>
+      <th class="px-4 py-2">User</th><th class="px-4 py-2">Role</th><th class="px-4 py-2">Joined</th><th class="px-4 py-2">Status</th><th class="px-4 py-2"></th>
+    </tr></thead>
+    <tbody class="divide-y divide-slate-100">
+      {% for u in page_obj %}
+      <tr>
+        <td class="px-4 py-2"><p class="font-semibold">{{ u.username }}</p><p class="text-xs text-slate-500">{{ u.email }}</p></td>
+        <td class="px-4 py-2">{% if u.is_staff %}Staff{% else %}{{ u.role|default:"-" }}{% endif %}</td>
+        <td class="px-4 py-2 text-slate-500">{{ u.date_joined|date:"M d, Y" }}</td>
+        <td class="px-4 py-2">{% if u.is_active %}<span class="text-green-600">Active</span>{% else %}<span class="text-red-600">Blocked</span>{% endif %}</td>
+        <td class="px-4 py-2 text-right">
+          {% if u != request.user and not u.is_superuser %}
+          <form method="post" action="{% url 'adminpanel:user_toggle' u.pk %}" class="m-0">
+            {% csrf_token %}<input type="hidden" name="next" value="{{ request.get_full_path }}">
+            <button class="rounded-lg border border-slate-300 px-3 py-1 text-xs font-semibold hover:bg-slate-50">{% if u.is_active %}Block{% else %}Unblock{% endif %}</button>
+          </form>
+          {% endif %}
+        </td>
+      </tr>
+      {% empty %}
+      <tr><td colspan="5" class="px-4 py-8 text-center text-slate-500">Kunai user bhetiyena.</td></tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+{% with qs="role="|add:role|add:"&q="|add:q %}{% include 'adminpanel/_pager.html' %}{% endwith %}
+{% endblock %}

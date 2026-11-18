@@ -1,0 +1,57 @@
+{% load static %}
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>{% block title %}RojGari{% endblock %}</title>
+
+    <link rel="icon" href="{% static 'images/logo.png' %}">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+    <link rel="stylesheet" href="{% static 'css/output.css' %}?v={% now 'U' %}" />
+</head>
+
+<body class="flex min-h-screen flex-col bg-slate-100 font-sans text-slate-900 antialiased">
+
+    {% include 'includes/navbar.html' %}
+
+    <!-- FLASH MESSAGES (toast) -->
+    {% if messages %}
+    <div id="toasts" class="pointer-events-none fixed right-4 top-20 z-50 flex w-[calc(100%-2rem)] max-w-sm flex-col gap-2">
+        {% for message in messages %}
+            <div data-toast
+                 class="pointer-events-auto flex items-start gap-3 rounded-xl border bg-white p-4 text-sm font-medium shadow-lg
+                    {% if 'success' in message.tags %}border-green-200 text-green-700
+                    {% elif 'error' in message.tags %}border-red-200 text-red-700
+                    {% elif 'warning' in message.tags %}border-amber-200 text-amber-700
+                    {% else %}border-blue-200 text-blue-700{% endif %}">
+                <span class="flex-1">{{ message }}</span>
+                <button type="button" data-toast-close aria-label="Close" class="text-slate-400 hover:text-slate-700">&times;</button>
+            </div>
+        {% endfor %}
+    </div>
+    <script>
+      (function () {
+        var box = document.getElementById("toasts");
+        if (!box) return;
+        function hide(el) {
+          el.style.transition = "opacity .3s";
+          el.style.opacity = "0";
+          setTimeout(function () { el.remove(); }, 300);
+        }
+        box.querySelectorAll("[data-toast]").forEach(function (t) {
+          t.querySelector("[data-toast-close]").addEventListener("click", function () { hide(t); });
+          setTimeout(function () { hide(t); }, 5000);
+        });
+      })();
+    </script>
+    {% endif %}
+
+    <!-- PAGE CONTENT -->
+    <main class="flex-1">
+        {% block content %}{% endblock %}
+    </main>
+     {% include 'includes/footer.html' %}
+
+</body>
+</html>

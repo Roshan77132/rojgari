@@ -1,0 +1,26 @@
+{% extends 'base.html' %}
+{% block title %}Admin | RojGari{% endblock %}
+
+{% block content %}
+<div class="mx-auto max-w-6xl px-4 py-8 sm:px-6">
+  <div class="flex flex-wrap items-center justify-between gap-3">
+    <h1 class="text-2xl font-bold text-slate-900">Admin panel</h1>
+    <a href="/admin/" class="text-sm font-medium text-slate-500 hover:text-blue-600">Django admin &rarr;</a>
+  </div>
+
+  <nav class="mt-4 flex gap-1 overflow-x-auto border-b border-slate-300 text-sm font-medium">
+    {% url 'adminpanel:dashboard' as u_dash %}
+    {% url 'adminpanel:companies' as u_comp %}
+    {% url 'adminpanel:users' as u_users %}
+    {% url 'adminpanel:jobs' as u_jobs %}
+    <a href="{{ u_dash }}"  class="-mb-px shrink-0 border-b-2 px-4 py-2 {% if request.path == u_dash %}border-blue-600 text-blue-600{% else %}border-transparent text-slate-600 hover:text-blue-600{% endif %}">
+      Overview
+    </a>
+    <a href="{{ u_comp }}"  class="-mb-px shrink-0 border-b-2 px-4 py-2 {% if request.path == u_comp %}border-blue-600 text-blue-600{% else %}border-transparent text-slate-600 hover:text-blue-600{% endif %}">Companies</a>
+    <a href="{{ u_users }}" class="-mb-px shrink-0 border-b-2 px-4 py-2 {% if request.path == u_users %}border-blue-600 text-blue-600{% else %}border-transparent text-slate-600 hover:text-blue-600{% endif %}">Users</a>
+    <a href="{{ u_jobs }}"  class="-mb-px shrink-0 border-b-2 px-4 py-2 {% if request.path == u_jobs %}border-blue-600 text-blue-600{% else %}border-transparent text-slate-600 hover:text-blue-600{% endif %}">Jobs</a>
+  </nav>
+
+  <div class="mt-6">{% block panel %}{% endblock %}</div>
+</div>
+{% endblock %}

@@ -1,0 +1,58 @@
+{% extends 'adminpanel/_layout.html' %}
+
+{% block panel %}
+<div class="grid grid-cols-2 gap-4 lg:grid-cols-6">
+  <div class="rounded-2xl bg-white p-4 shadow-sm"><p class="text-xs font-medium text-slate-500">Users</p><p class="mt-1 text-2xl font-extrabold text-slate-900">{{ stats.users }}</p></div>
+  <div class="rounded-2xl bg-white p-4 shadow-sm"><p class="text-xs font-medium text-slate-500">Companies</p><p class="mt-1 text-2xl font-extrabold text-slate-900">{{ stats.companies }}</p></div>
+  <a href="{% url 'adminpanel:companies' %}" class="rounded-2xl p-4 shadow-sm {% if stats.pending %}bg-amber-50 ring-1 ring-amber-300{% else %}bg-white{% endif %}">
+    <p class="text-xs font-medium text-slate-500">Pending verification</p>
+    <p class="mt-1 text-2xl font-extrabold {% if stats.pending %}text-amber-600{% else %}text-slate-900{% endif %}">{{ stats.pending }}</p>
+  </a>
+  <div class="rounded-2xl bg-white p-4 shadow-sm"><p class="text-xs font-medium text-slate-500">Jobs</p><p class="mt-1 text-2xl font-extrabold text-slate-900">{{ stats.jobs }}</p></div>
+  <div class="rounded-2xl bg-white p-4 shadow-sm"><p class="text-xs font-medium text-slate-500">Open jobs</p><p class="mt-1 text-2xl font-extrabold text-indigo-600">{{ stats.open_jobs }}</p></div>
+  <div class="rounded-2xl bg-white p-4 shadow-sm"><p class="text-xs font-medium text-slate-500">Applications</p><p class="mt-1 text-2xl font-extrabold text-slate-900">{{ stats.applications }}</p></div>
+</div>
+
+<section class="mt-8">
+  <div class="flex items-center justify-between">
+    <h2 class="text-lg font-extrabold text-slate-900">Verification queue</h2>
+    <a href="{% url 'adminpanel:companies' %}" class="text-sm font-semibold text-indigo-600 hover:underline">View all</a>
+  </div>
+  <div class="mt-3 space-y-3">
+    {% for c in pending %}
+    <div class="flex flex-wrap items-center justify-between gap-3 rounded-2xl bg-white p-4 shadow-sm">
+      <div class="min-w-0">
+        <p class="font-bold text-slate-900">{{ c.company_name }}</p>
+        <p class="text-xs text-slate-500">{{ c.user.username }} &middot; {{ c.user.email }}{% if c.pan_number %} &middot; PAN {{ c.pan_number }}{% endif %}</p>
+      </div>
+      {% include 'adminpanel/_company_actions.html' %}
+    </div>
+    {% empty %}
+    <p class="rounded-2xl bg-white p-6 text-center text-sm text-slate-500 shadow-sm">No companies are pending.</p>
+    {% endfor %}
+  </div>
+</section>
+
+<section class="mt-8">
+  <h2 class="text-lg font-extrabold text-slate-900">Recent applications</h2>
+  <div class="mt-3 overflow-hidden rounded-2xl bg-white shadow-sm">
+    <table class="w-full text-left text-sm">
+      <thead class="bg-slate-50 text-xs uppercase text-slate-500"><tr>
+        <th class="px-4 py-2">Applicant</th><th class="px-4 py-2">Job</th><th class="px-4 py-2">Status</th><th class="px-4 py-2">Date</th>
+      </tr></thead>
+      <tbody class="divide-y divide-slate-100">
+        {% for a in recent_applications %}
+        <tr>
+          <td class="px-4 py-2">{{ a.applicant.user.username }}</td>
+          <td class="px-4 py-2">{{ a.job.title }} <span class="text-slate-400">&middot; {{ a.job.company.company_name }}</span></td>
+          <td class="px-4 py-2">{{ a.get_status_display }}</td>
+          <td class="px-4 py-2 text-slate-500">{{ a.applied_at|date:"M d, H:i" }}</td>
+        </tr>
+        {% empty %}
+        <tr><td colspan="4" class="px-4 py-6 text-center text-slate-500">No applications yet.</td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</section>
+{% endblock %}

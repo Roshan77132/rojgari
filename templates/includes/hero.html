@@ -1,0 +1,325 @@
+{% load static %}
+<section
+  class="relative overflow-hidden bg-linear-to-r from-[#e9f1fd] via-[#dfe9f7] to-[#cfe0f7]"
+>
+  <!-- soft glow shapes -->
+  <div
+    class="pointer-events-none absolute -left-24 -top-24 h-72 w-72 rounded-full bg-white/60 blur-3xl"
+  ></div>
+  <div
+    class="pointer-events-none absolute left-1/3 top-1/2 h-56 w-56 rounded-full bg-blue-200/40 blur-3xl"
+  ></div>
+
+  <!-- RIGHT PANEL: pattern + photo + slogan (laptop only) -->
+  <div
+    class="pointer-events-none absolute inset-y-0 right-0 hidden w-[44%] lg:block"
+  >
+    <!-- Layer 1: word pattern (fades to the left) -->
+    <div
+      class="absolute inset-0 overflow-hidden mask-[linear-gradient(to_right,transparent,black_30%)]"
+    >
+      {% for i in "12345678901234" %}
+      <p
+        class="whitespace-nowrap text-[13px] font-extrabold leading-6.25 tracking-[0.25em] text-blue-300/50 even:-ml-14"
+      >
+        HIRING &middot; JOBS &middot; MATCHING &middot; HIRING &middot; JOBS
+        &middot; MATCHING &middot; HIRING &middot; JOBS &middot; MATCHING
+        &middot; HIRING &middot; JOBS &middot; MATCHING
+      </p>
+      {% endfor %}
+    </div>
+
+    <!-- Layer 2: big soft shape behind the model -->
+    <div
+      class="absolute -right-16 top-4 h-75 w-55 rotate-25 rounded-[60px] bg-[#d3e0f5]"
+    ></div>
+
+    <!-- Layer 3: the photo -->
+    <img
+      src="{% static 'images/Hero-Model.png' %}"
+      alt="Find your next job"
+      class="absolute bottom-0 left-[44%] z-20 h-full w-auto -translate-x-1/2 object-contain object-bottom"
+      onerror="this.style.display = 'none'"
+    />
+
+    <!-- Layer 4: slogan, in front of the model -->
+    <div
+      class="absolute left-[10%] top-[48%] z-30 font-extrabold uppercase leading-[0.9]"
+    >
+      <span class="block text-[40px] text-white [-webkit-text-stroke:1px_#fff]"
+        >We do</span
+      >
+      <strong
+        class="block text-[94px] tracking-wide text-[#14c3e8] [-webkit-text-stroke:4px_#14c3e8] [paint-order:stroke_fill]"
+        >Better</strong
+      >
+    </div>
+  </div>
+
+  <!-- LEFT: content -->
+  <!-- NOTE: use the exact same container classes as your navbar so the left edges line up -->
+  <div
+    class="relative mx-auto max-w-6xl px-4 pb-0 pt-6 sm:px-6 lg:min-h-87.25 lg:pt-11"
+  >
+    <!-- width = space between content left edge and the "WE DO BETTER" slogan, max 680px -->
+    <div
+      class="lg:w-[min(680px,calc(60.4vw-max(24px,(100vw-1152px)/2+24px)-88px))]"
+    >
+      <h1
+        class="text-center text-xl font-semibold tracking-tight text-slate-900 sm:text-2xl lg:text-left lg:text-[26px]"
+      >
+        Start your Success Journey
+        <span class="font-medium text-blue-600">Today</span>
+      </h1>
+
+      <!-- Stats: 3 columns on mobile (icon above), a row on laptop -->
+      <div
+        class="mt-5 grid grid-cols-3 gap-2 sm:gap-6 lg:mt-7.5 lg:flex lg:flex-wrap lg:justify-start lg:gap-x-15.5 lg:gap-y-4"
+      >
+        <!-- Live Jobs (clickable -> all jobs) -->
+        <a
+          href="{% url 'jobs:list' %}"
+          class="group flex flex-col items-center gap-1.5 rounded-lg text-center outline-none focus-visible:ring-2 focus-visible:ring-blue-500 lg:flex-row lg:gap-3.5 lg:text-left"
+        >
+          <span
+            class="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-white text-[#0b3a9e] shadow-[0_0_0_3px_#c9d9f5,0_3px_8px_rgba(30,64,175,0.15)] transition group-hover:shadow-[0_0_0_3px_#9fbdf0,0_3px_8px_rgba(30,64,175,0.25)] lg:h-14 lg:w-14 lg:shadow-[0_0_0_5px_#c9d9f5,0_4px_10px_rgba(30,64,175,0.15)] lg:group-hover:shadow-[0_0_0_5px_#9fbdf0,0_4px_10px_rgba(30,64,175,0.25)]"
+          >
+            <svg viewBox="0 0 24 24" class="h-5 w-5 lg:h-6 lg:w-6" fill="currentColor">
+              <path d="M9 3a2 2 0 0 0-2 2v2H5a2 2 0 0 0-2 2v10a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2h-2V5a2 2 0 0 0-2-2H9Zm0 2h6v2H9V5Zm-6 8h18v-1H3v1Z" />
+            </svg>
+          </span>
+          <div>
+            <p class="text-xs leading-tight text-slate-900 sm:text-sm lg:text-[17px]">
+              Live Jobs
+            </p>
+            <p class="text-2xl font-semibold leading-tight text-[#0b4fc9] transition group-hover:text-[#0a3a96] sm:text-3xl lg:text-[31px]">
+              {{ stats.jobs|default:0 }}
+            </p>
+          </div>
+        </a>
+
+        <!-- Vacancies (clickable -> all jobs) -->
+        <a
+          href="{% url 'jobs:list' %}"
+          class="group flex flex-col items-center gap-1.5 rounded-lg text-center outline-none focus-visible:ring-2 focus-visible:ring-blue-500 lg:flex-row lg:gap-3.5 lg:text-left"
+        >
+          <span
+            class="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-white text-[#0b3a9e] shadow-[0_0_0_3px_#c9d9f5,0_3px_8px_rgba(30,64,175,0.15)] transition group-hover:shadow-[0_0_0_3px_#9fbdf0,0_3px_8px_rgba(30,64,175,0.25)] lg:h-14 lg:w-14 lg:shadow-[0_0_0_5px_#c9d9f5,0_4px_10px_rgba(30,64,175,0.15)] lg:group-hover:shadow-[0_0_0_5px_#9fbdf0,0_4px_10px_rgba(30,64,175,0.25)]"
+          >
+            <svg viewBox="0 0 24 24" class="h-5 w-5 lg:h-6 lg:w-6" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round">
+              <circle cx="11" cy="11" r="6.5" /><path d="m20 20-4.2-4.2" />
+            </svg>
+          </span>
+          <div>
+            <p class="text-xs leading-tight text-slate-900 sm:text-sm lg:text-[17px]">
+              Vacancies
+            </p>
+            <p class="text-2xl font-semibold leading-tight text-[#0b4fc9] transition group-hover:text-[#0a3a96] sm:text-3xl lg:text-[31px]">
+              {{ stats.vacancies|default:0 }}
+            </p>
+          </div>
+        </a>
+
+        <!-- Organizations (not clickable: no company list page) -->
+        <div class="flex flex-col items-center gap-1.5 text-center lg:flex-row lg:gap-3.5 lg:text-left">
+          <span
+            class="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-white text-[#0b3a9e] shadow-[0_0_0_3px_#c9d9f5,0_3px_8px_rgba(30,64,175,0.15)] lg:h-14 lg:w-14 lg:shadow-[0_0_0_5px_#c9d9f5,0_4px_10px_rgba(30,64,175,0.15)]"
+          >
+            <svg viewBox="0 0 24 24" class="h-5 w-5 lg:h-6 lg:w-6" fill="currentColor">
+              <path d="M5 3h10a1 1 0 0 1 1 1v4h3a1 1 0 0 1 1 1v12h-6v-4h-2v4H4V4a1 1 0 0 1 1-1Zm2 3v2h2V6H7Zm4 0v2h2V6h-2ZM7 10v2h2v-2H7Zm4 0v2h2v-2h-2Z" />
+            </svg>
+          </span>
+          <div>
+            <p class="text-xs leading-tight text-slate-900 sm:text-sm lg:text-[17px]">
+              Organizations
+            </p>
+            <p class="text-2xl font-semibold leading-tight text-[#0b4fc9] sm:text-3xl lg:text-[31px]">
+              {{ stats.companies|default:0 }}
+            </p>
+          </div>
+        </div>
+      </div>
+
+      <!-- MOBILE BANNER (below content, hidden on laptop) -->
+      <div
+        class="pointer-events-none relative -mx-4 mb-2 mt-3 h-64 overflow-hidden sm:-mx-6 lg:hidden"
+        aria-hidden="true"
+      >
+        <div
+          class="absolute inset-0 overflow-hidden mask-[linear-gradient(to_bottom,transparent,black_30%)]"
+        >
+          {% for i in "1234567890" %}
+          <p
+            class="whitespace-nowrap text-[11px] font-extrabold leading-5 tracking-[0.25em] text-blue-300/50 even:-ml-10"
+          >
+            HIRING &middot; JOBS &middot; MATCHING &middot; HIRING &middot; JOBS
+            &middot; MATCHING &middot; HIRING &middot; JOBS &middot; MATCHING
+          </p>
+          {% endfor %}
+        </div>
+        <!-- photo fades out at the bottom so there is no hard cut above the search box -->
+        <img
+          src="{% static 'images/Hero-Model.png' %}"
+          alt=""
+          class="absolute bottom-0 left-1/2 z-20 h-full w-auto -translate-x-1/2 object-contain object-bottom mask-[linear-gradient(to_bottom,black_75%,transparent)]"
+          onerror="this.style.display = 'none'"
+        />
+        <div
+          class="absolute left-[6%] top-[38%] z-30 font-extrabold uppercase leading-[0.9] sm:left-[18%]"
+        >
+          <span class="block text-[22px] text-white [-webkit-text-stroke:1px_#fff]"
+            >We do</span
+          >
+          <strong
+            class="block text-[52px] tracking-wide text-[#14c3e8] [-webkit-text-stroke:2px_#14c3e8] [paint-order:stroke_fill]"
+            >Better</strong
+          >
+        </div>
+      </div>
+
+      <!-- Search -->
+      <form
+        action="{% url 'jobs:list' %}"
+        method="get"
+        class="mt-5 flex h-14 items-center gap-2 rounded-lg border border-[#cfd8e8] bg-white pl-4 pr-2 transition focus-within:ring-2 focus-within:ring-blue-500"
+      >
+        <input
+          type="text"
+          name="q"
+          placeholder="Search By Organization"
+          aria-label="Search jobs"
+          class="min-w-0 flex-1 bg-transparent text-base text-slate-800 outline-none placeholder:text-slate-500"
+        />
+        <button
+          type="submit"
+          aria-label="Search Job"
+          class="flex h-10 shrink-0 items-center gap-2 rounded-md bg-blue-600 px-3 text-base font-medium text-white transition hover:bg-blue-700 min-[400px]:px-4"
+        >
+          <svg
+            viewBox="0 0 24 24"
+            class="h-4.25 w-4.25"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+            stroke-linecap="round"
+          >
+            <circle cx="11" cy="11" r="7" />
+            <path d="m20 20-4-4" />
+          </svg>
+          <span class="hidden min-[400px]:inline">Search Job</span>
+        </button>
+      </form>
+
+      <!-- Quick filters (job type): scroll runs to the screen edge on mobile -->
+      <div
+        class="no-scrollbar -mx-4 mt-2.5 flex flex-nowrap gap-2.5 overflow-x-auto px-4 pb-2 sm:-mx-6 sm:px-6 lg:mx-0 lg:flex-wrap lg:gap-2.75 lg:overflow-visible lg:px-0 lg:pb-0"
+      >
+        <a
+          href="{% url 'jobs:list' %}"
+          class="h-10.75 shrink-0 whitespace-nowrap rounded-md bg-[#cfe3fd] px-2.75 text-[15px] font-medium leading-10.75 text-[#1a6fd9] transition lg:hover:bg-[#bdd8fb]"
+          >All Jobs</a
+        >
+        <a
+          href="{% url 'jobs:list' %}?job_type=full_time"
+          class="h-10.75 shrink-0 whitespace-nowrap rounded-md bg-[#cfe3fd] px-2.75 text-[15px] font-medium leading-10.75 text-[#1a6fd9] transition lg:hover:bg-[#bdd8fb]"
+          >Full-time</a
+        >
+        <a
+          href="{% url 'jobs:list' %}?job_type=part_time"
+          class="h-10.75 shrink-0 whitespace-nowrap rounded-md bg-[#cfe3fd] px-2.75 text-[15px] font-medium leading-10.75 text-[#1a6fd9] transition lg:hover:bg-[#bdd8fb]"
+          >Part-time</a
+        >
+        <a
+          href="{% url 'jobs:list' %}?job_type=internship"
+          class="h-10.75 shrink-0 whitespace-nowrap rounded-md bg-[#cfe3fd] px-2.75 text-[15px] font-medium leading-10.75 text-[#1a6fd9] transition lg:hover:bg-[#bdd8fb]"
+          >Internship</a
+        >
+        <a
+          href="{% url 'jobs:list' %}?job_type=remote"
+          class="h-10.75 shrink-0 whitespace-nowrap rounded-md bg-[#cfe3fd] px-2.75 text-[15px] font-medium leading-10.75 text-[#1a6fd9] transition lg:hover:bg-[#bdd8fb]"
+          >Remote</a
+        >
+      </div>
+    </div>
+  </div>
+
+</section>
+
+<!-- TOP EMPLOYERS (Swiper, real data only) -->
+{% if top_companies %}
+<section class="bg-white" aria-label="Top employers">
+  <div class="mx-auto flex h-21 max-w-6xl items-center px-4 sm:px-6">
+    <h2
+      class="w-20 shrink-0 text-sm font-semibold leading-tight text-gray-700 sm:w-27.5 sm:text-[15px] lg:w-40 lg:text-lg"
+    >
+      Top Employers
+    </h2>
+
+    <div
+      class="swiper employers-swiper h-16 min-w-0 flex-1 mask-[linear-gradient(to_right,transparent,black_4%,black_96%,transparent)]"
+    >
+      <div class="swiper-wrapper">
+        {% for e in top_companies %}{% if e.logo %}
+        <div class="swiper-slide">
+          <a
+            href="{% url 'jobs:list' %}?q={{ e.company_name|urlencode }}"
+            class="employer-card"
+            title="{{ e.company_name }}"
+          >
+            <img src="{{ e.logo.url }}" alt="{{ e.company_name }}" loading="lazy" />
+          </a>
+        </div>
+        {% endif %}{% endfor %}
+      </div>
+    </div>
+  </div>
+</section>
+{% endif %}
+
+<link
+  rel="stylesheet"
+  href="https://cdn.jsdelivr.net/npm/swiper@11.1.14/swiper-bundle.min.css"
+/>
+<style>
+  .no-scrollbar {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+  .no-scrollbar::-webkit-scrollbar {
+    display: none;
+  }
+  .employers-swiper .swiper-wrapper {
+    transition-timing-function: linear !important;
+    align-items: center;
+  }
+  .employers-swiper .swiper-slide {
+    display: flex;
+    width: auto;
+    flex-shrink: 0;
+    align-items: center;
+    justify-content: center;
+  }
+  .employer-card {
+    display: grid;
+    height: 3.25rem;
+    width: 3.75rem;
+    place-items: center;
+    padding: 0.25rem;
+    border-radius: 0.5rem;
+    background: #fff;
+    box-shadow: 0 1px 6px rgba(0, 0, 0, 0.12);
+  }
+  .employer-card img {
+    max-height: 100%;
+    max-width: 100%;
+    object-fit: contain;
+  }
+  @media (min-width: 640px) {
+    .employer-card {
+      height: 3.75rem;
+      width: 4.375rem;
+    }
+  }
+</style>
+<script src="https://cdn.jsdelivr.net/npm/swiper@11.1.14/swiper-bundle.min.js"></script>
+<script src="{% static 'js/swiper.js' %}?v={% now 'U' %}"></script>

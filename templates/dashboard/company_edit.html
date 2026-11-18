@@ -1,0 +1,79 @@
+{% extends 'base.html' %}
+
+{% block title %}Edit Company Profile | RojGari{% endblock %}
+
+{% block content %}
+<div class="mx-auto max-w-3xl px-4 py-8 sm:px-6 lg:py-10">
+
+  <a href="{% url 'dashboard:company' %}" class="inline-flex items-center gap-1 text-sm font-medium text-blue-600 hover:underline">&larr; Back to dashboard</a>
+
+  <div class="mt-4 rounded-2xl border border-[#dbe5f5] bg-white shadow-sm shadow-blue-100/60">
+
+    <!-- Header -->
+    <div class="flex items-center gap-4 border-b border-slate-100 px-5 py-5 sm:px-7">
+      {% if form.instance.logo %}
+        <img src="{{ form.instance.logo.url }}" alt="{{ form.instance.company_name }}"
+             class="h-16 w-16 shrink-0 rounded-xl bg-white object-contain ring-1 ring-slate-200">
+      {% else %}
+        <div class="flex h-16 w-16 shrink-0 items-center justify-center rounded-xl bg-[#cfe3fd] text-2xl font-bold text-[#1a6fd9]">
+          {% if form.instance.company_name %}{{ form.instance.company_name|first|upper }}{% else %}C{% endif %}
+        </div>
+      {% endif %}
+      <div class="min-w-0">
+        <h1 class="text-xl font-extrabold tracking-tight text-slate-900 sm:text-2xl">Edit company profile</h1>
+        <p class="mt-0.5 flex flex-wrap items-center gap-2 text-sm text-slate-500">
+          {% if form.instance.company_name %}<span class="truncate">{{ form.instance.company_name }}</span>{% endif %}
+          {% if form.instance.is_verified %}
+            <span class="rounded-full bg-green-50 px-2.5 py-0.5 text-xs font-semibold text-green-700 ring-1 ring-green-200">Verified</span>
+          {% else %}
+            <span class="rounded-full bg-amber-50 px-2.5 py-0.5 text-xs font-semibold text-amber-700 ring-1 ring-amber-200">Pending verification</span>
+          {% endif %}
+        </p>
+      </div>
+    </div>
+
+    <!-- Form -->
+    <form method="post" enctype="multipart/form-data" class="form-ui px-5 py-6 sm:px-7">
+      {% csrf_token %}
+
+      {% if form.non_field_errors %}
+        <div class="mb-5 rounded-lg border border-red-200 bg-red-50 p-3 text-sm text-red-600">{{ form.non_field_errors }}</div>
+      {% endif %}
+
+      <div class="grid gap-x-5 gap-y-6 sm:grid-cols-2">
+        {% for field in form %}
+        <div class="{% if field.widget_type == 'textarea' or field.field.widget.input_type == 'file' %}sm:col-span-2{% endif %}">
+          <label for="{{ field.id_for_label }}" class="mb-1.5 block text-sm font-semibold text-slate-700">
+            {{ field.label }}{% if field.field.required %}<span class="ml-0.5 text-red-500">*</span>{% endif %}
+          </label>
+
+          {% if field.field.widget.input_type == 'file' %}
+            <div class="rounded-xl border-2 border-dashed border-[#bcd2f3] bg-[#f5f9ff] p-4 text-sm text-slate-600">
+              {{ field }}
+            </div>
+          {% else %}
+            {{ field }}
+          {% endif %}
+
+          {% if field.help_text %}
+            <p class="mt-1.5 text-xs text-slate-400">{{ field.help_text }}</p>
+          {% endif %}
+          {% for error in field.errors %}
+            <p class="mt-1.5 text-xs font-medium text-red-600">{{ error }}</p>
+          {% endfor %}
+        </div>
+        {% endfor %}
+      </div>
+
+      <div class="mt-8 flex flex-col-reverse items-stretch gap-3 border-t border-slate-100 pt-5 sm:flex-row sm:items-center">
+        <a href="{% url 'dashboard:company' %}"
+           class="rounded-lg border border-[#cfd8e8] px-5 py-2.5 text-center text-sm font-semibold text-slate-600 transition hover:bg-[#eef3fb]">Cancel</a>
+        <button type="submit"
+                class="rounded-lg bg-blue-600 px-6 py-2.5 text-sm font-semibold text-white transition hover:bg-blue-700 sm:ml-auto">
+          Save changes
+        </button>
+      </div>
+    </form>
+  </div>
+</div>
+{% endblock %}

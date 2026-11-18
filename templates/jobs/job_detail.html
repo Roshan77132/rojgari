@@ -1,0 +1,163 @@
+{% extends 'base.html' %}
+{% load job_extras %}
+
+{% block title %}{{ job.title }} | RojGari{% endblock %}
+
+{% block content %}
+<div class="mx-auto max-w-6xl px-4 py-8 sm:px-6 lg:py-10">
+  <a href="{% url 'jobs:list' %}" class="inline-flex items-center gap-1 text-sm font-medium text-blue-600 hover:underline">&larr; Back to jobs</a>
+
+  {% if not job.is_open or not job.company.is_verified %}
+    <div class="mt-4 rounded-xl border border-amber-200 bg-amber-50 p-3 text-sm text-amber-700">
+      {% if not job.company.is_verified %}
+        Your company is not verified, so this job is not visible to the public.
+      {% else %}
+        This job is not open right now (inactive or past its deadline).
+      {% endif %}
+      Only you can see this.
+    </div>
+  {% endif %}
+
+  <!-- Header card -->
+  <div class="mt-4 rounded-2xl border border-[#dbe5f5] bg-white p-5 shadow-sm shadow-blue-100/60 sm:p-6">
+    <div class="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+      <div class="flex items-center gap-4">
+        {% if job.company.logo %}
+          <img src="{{ job.company.logo.url }}" alt="{{ job.company.company_name }}"
+               class="h-16 w-16 shrink-0 rounded-xl bg-white object-contain ring-1 ring-slate-100">
+        {% else %}
+          <div class="flex h-16 w-16 shrink-0 items-center justify-center rounded-xl bg-[#cfe3fd] text-xl font-bold text-[#1a6fd9]">
+            {{ job.company.company_name|first|upper }}
+          </div>
+        {% endif %}
+        <div class="min-w-0">
+          <h1 class="text-xl font-extrabold tracking-tight text-slate-900 sm:text-2xl">{{ job.title }}</h1>
+          <p class="text-sm text-slate-500">
+            {{ job.company.company_name }}
+            {% if job.company.is_verified %}<span class="font-medium text-green-600">&middot; Verified</span>{% endif %}
+          </p>
+        </div>
+      </div>
+
+      <div class="shrink-0">
+        {% if is_owner %}
+          <a href="{% url 'jobs:edit' job.pk %}"
+             class="inline-block w-full rounded-lg border border-[#cfd8e8] px-5 py-2.5 text-center text-sm font-semibold text-slate-700 transition hover:bg-[#eef3fb] sm:w-auto">Edit</a>
+
+        {% elif user.is_authenticated and user.role == 'jobseeker' %}
+          <div class="flex flex-col gap-2 sm:flex-row sm:items-center">
+
+            <!-- Save / Unsave -->
+            <form method="post" action="{% url 'jobs:save_toggle' job.pk %}" class="w-full sm:w-auto">
+              {% csrf_token %}
+              <input type="hidden" name="next" value="{{ request.path }}">
+              <button type="submit"
+                      class="inline-flex w-full items-center justify-center gap-2 rounded-lg border px-5 py-2.5 text-sm font-semibold transition sm:w-auto
+                             {% if is_saved %}border-blue-300 bg-[#eef3fb] text-blue-700 hover:bg-blue-100{% else %}border-[#cfd8e8] text-slate-700 hover:bg-[#eef3fb]{% endif %}">
+                <svg viewBox="0 0 24 24" class="h-4 w-4" fill="{% if is_saved %}currentColor{% else %}none{% endif %}" stroke="currentColor" stroke-width="2" stroke-linejoin="round"><path d="M6 3h12v18l-6-4-6 4V3Z"/></svg>
+                {% if is_saved %}Saved{% else %}Save job{% endif %}
+              </button>
+            </form>
+
+            {% if application %}
+              <a href="{% url 'applications:mine' %}"
+                 class="inline-block w-full rounded-lg bg-green-600 px-6 py-2.5 text-center text-sm font-semibold text-white transition hover:bg-green-700 sm:w-auto">
+                Applied ({{ application.get_status_display }})
+              </a>
+            {% elif job.is_open %}
+              <a href="{% url 'applications:apply' job.pk %}"
+                 class="inline-block w-full rounded-lg bg-blue-600 px-6 py-2.5 text-center text-sm font-semibold text-white transition hover:bg-blue-700 sm:w-auto">
+                Apply now
+              </a>
+            {% endif %}
+          </div>
+
+        {% elif not user.is_authenticated %}
+          <a href="{% url 'accounts:login' %}?next={{ request.path }}"
+             class="inline-block w-full rounded-lg bg-blue-600 px-6 py-2.5 text-center text-sm font-semibold text-white transition hover:bg-blue-700 sm:w-auto">Login to apply</a>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+
+  <!-- Body: description (left) + overview (right) -->
+  <div class="mt-6 grid gap-6 lg:grid-cols-3">
+
+    <div class="space-y-6 lg:col-span-2">
+      <div class="rounded-2xl border border-[#dbe5f5] bg-white p-5 shadow-sm shadow-blue-100/60 sm:p-6">
+        <h2 class="text-lg font-bold text-slate-900">Job description</h2>
+        <div class="mt-3 text-sm leading-relaxed text-slate-700 [&>h3:first-child]:mt-0 [&_h3]:mb-2 [&_h3]:mt-6 [&_h3]:text-[15px] [&_h3]:font-bold [&_h3]:text-slate-900 [&_li]:marker:text-blue-500 [&_p]:mb-2 [&_ul]:mb-2 [&_ul]:list-disc [&_ul]:space-y-1.5 [&_ul]:pl-5">
+          {{ job.description|rich_text }}
+        </div>
+
+        {% if job.requirements %}
+          <h2 class="mt-8 border-t border-slate-100 pt-6 text-lg font-bold text-slate-900">Requirements</h2>
+          <div class="mt-3 text-sm leading-relaxed text-slate-700 [&>h3:first-child]:mt-0 [&_h3]:mb-2 [&_h3]:mt-6 [&_h3]:text-[15px] [&_h3]:font-bold [&_h3]:text-slate-900 [&_li]:marker:text-blue-500 [&_p]:mb-2 [&_ul]:mb-2 [&_ul]:list-disc [&_ul]:space-y-1.5 [&_ul]:pl-5">
+            {{ job.requirements|rich_text }}
+          </div>
+        {% endif %}
+
+        {% if job.skills_list %}
+          <h2 class="mt-8 border-t border-slate-100 pt-6 text-lg font-bold text-slate-900">Skills</h2>
+          <div class="mt-3 flex flex-wrap gap-2">
+            {% for skill in job.skills_list %}
+              <span class="rounded-full bg-[#cfe3fd] px-3 py-1 text-xs font-medium text-[#1a6fd9]">{{ skill }}</span>
+            {% endfor %}
+          </div>
+        {% endif %}
+      </div>
+    </div>
+
+    <aside class="lg:col-span-1">
+      <div class="rounded-2xl border border-[#dbe5f5] bg-white p-5 shadow-sm shadow-blue-100/60 sm:p-6 lg:sticky lg:top-24">
+        <h2 class="text-lg font-bold text-slate-900">Job overview</h2>
+        <dl class="mt-4 space-y-4 text-sm">
+          <div class="flex items-start justify-between gap-4 border-b border-slate-100 pb-3">
+            <dt class="text-slate-400">Location</dt>
+            <dd class="text-right font-medium text-slate-800">{{ job.location }}</dd>
+          </div>
+          <div class="flex items-start justify-between gap-4 border-b border-slate-100 pb-3">
+            <dt class="text-slate-400">Job type</dt>
+            <dd class="text-right font-medium text-slate-800">{{ job.get_job_type_display }}</dd>
+          </div>
+          <div class="flex items-start justify-between gap-4 border-b border-slate-100 pb-3">
+            <dt class="text-slate-400">Level</dt>
+            <dd class="text-right font-medium text-slate-800">{{ job.get_level_display }}</dd>
+          </div>
+          <div class="flex items-start justify-between gap-4 border-b border-slate-100 pb-3">
+            <dt class="text-slate-400">Vacancies</dt>
+            <dd class="text-right font-medium text-slate-800">{{ job.vacancies }}</dd>
+          </div>
+          <div class="flex items-start justify-between gap-4 border-b border-slate-100 pb-3">
+            <dt class="text-slate-400">Salary</dt>
+            <dd class="text-right font-semibold text-[#1a6fd9]">{{ job.salary_display }}</dd>
+          </div>
+          <div class="flex items-start justify-between gap-4">
+            <dt class="text-slate-400">Deadline</dt>
+            <dd class="text-right font-medium text-slate-800">{{ job.deadline|date:"M d, Y" }}</dd>
+          </div>
+        </dl>
+      </div>
+    </aside>
+  </div>
+</div>
+
+<!-- Mobile sticky bar (only for a jobseeker who can still apply) -->
+{% if user.is_authenticated and user.role == 'jobseeker' and not application and job.is_open and not is_owner %}
+  <div class="fixed inset-x-0 bottom-0 z-40 flex gap-2 border-t border-slate-200 bg-white/95 p-3 backdrop-blur lg:hidden">
+    <a href="{% url 'applications:apply' job.pk %}"
+       class="block flex-1 rounded-lg bg-blue-600 px-6 py-3 text-center text-sm font-semibold text-white hover:bg-blue-700">
+      Apply now
+    </a>
+    <form method="post" action="{% url 'jobs:save_toggle' job.pk %}">
+      {% csrf_token %}
+      <input type="hidden" name="next" value="{{ request.path }}">
+      <button type="submit" aria-label="{% if is_saved %}Unsave job{% else %}Save job{% endif %}"
+              class="flex h-full items-center rounded-lg border px-4 {% if is_saved %}border-blue-300 bg-[#eef3fb] text-blue-700{% else %}border-[#cfd8e8] bg-white text-slate-700{% endif %}">
+        <svg viewBox="0 0 24 24" class="h-5 w-5" fill="{% if is_saved %}currentColor{% else %}none{% endif %}" stroke="currentColor" stroke-width="2" stroke-linejoin="round"><path d="M6 3h12v18l-6-4-6 4V3Z"/></svg>
+      </button>
+    </form>
+  </div>
+  <div class="h-16 lg:hidden"></div>
+{% endif %}
+{% endblock %}

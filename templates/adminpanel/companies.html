@@ -1,0 +1,32 @@
+{% extends 'adminpanel/_layout.html' %}
+
+{% block panel %}
+<form method="get" class="flex flex-wrap gap-2">
+  <select name="status" class="rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm">
+    <option value="pending" {% if status == 'pending' %}selected{% endif %}>Pending</option>
+    <option value="verified" {% if status == 'verified' %}selected{% endif %}>Verified</option>
+    <option value="all" {% if status == 'all' %}selected{% endif %}>All</option>
+  </select>
+  <input type="text" name="q" value="{{ q }}" placeholder="Company, username, email, PAN"
+         class="min-w-0 flex-1 rounded-xl border border-slate-200 px-4 py-2 text-sm focus:border-indigo-500 focus:outline-none">
+  <button class="rounded-xl bg-indigo-600 px-5 py-2 text-sm font-semibold text-white hover:bg-indigo-700">Filter</button>
+</form>
+
+<div class="mt-4 space-y-3">
+  {% for c in page_obj %}
+  <div class="flex flex-wrap items-center justify-between gap-3 rounded-2xl bg-white p-4 shadow-sm">
+    <div class="min-w-0">
+      <p class="font-bold text-slate-900">{{ c.company_name }}
+        {% if c.is_verified %}<span class="ml-1 rounded-full bg-green-100 px-2 py-0.5 text-xs text-green-700">Verified</span>
+        {% else %}<span class="ml-1 rounded-full bg-amber-100 px-2 py-0.5 text-xs text-amber-700">Pending</span>{% endif %}
+      </p>
+      <p class="text-xs text-slate-500">{{ c.user.username }} &middot; {{ c.user.email }}{% if c.pan_number %} &middot; PAN {{ c.pan_number }}{% endif %}</p>
+    </div>
+    {% include 'adminpanel/_company_actions.html' %}
+  </div>
+  {% empty %}
+  <p class="rounded-2xl bg-white p-8 text-center text-sm text-slate-500 shadow-sm">Kunai company bhetiyena.</p>
+  {% endfor %}
+</div>
+{% with qs="status="|add:status|add:"&q="|add:q %}{% include 'adminpanel/_pager.html' %}{% endwith %}
+{% endblock %}
