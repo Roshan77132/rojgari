@@ -4,17 +4,13 @@
 
 <p><b>A role-based job portal for Nepal, connecting job seekers with verified employers.</b></p>
 
-![Python](https://img.shields.io/badge/Python-3.x-3776AB?logo=python&logoColor=white)
-![Django](https://img.shields.io/badge/Django-092E20?logo=django&logoColor=white)
-![MySQL](https://img.shields.io/badge/MySQL-8-4479A1?logo=mysql&logoColor=white)
-![Tailwind CSS](https://img.shields.io/badge/Tailwind_CSS-06B6D4?logo=tailwindcss&logoColor=white)
-![Git](https://img.shields.io/badge/Git-F05032?logo=git&logoColor=white)
-
-[Live Demo](#) &nbsp;|&nbsp; [Screenshots](#screenshots) &nbsp;|&nbsp; [Features](#features) &nbsp;|&nbsp; [Setup](#getting-started)
+[Screenshots](#screenshots) &nbsp;|&nbsp; [Features](#features) &nbsp;|&nbsp; [Setup](#getting-started)
 
 </div>
 
 ![Home page](screenshots/home.png)
+
+**Contents:** [Overview](#overview) | [Highlights](#highlights) | [Screenshots](#screenshots) | [Features](#features) | [Tech stack](#tech-stack) | [Architecture](#architecture) | [Engineering decisions](#engineering-decisions) | [Project structure](#project-structure) | [Getting started](#getting-started) | [Security](#security-practices) | [Testing](#testing) | [Roadmap](#roadmap)
 
 ## Overview
 
@@ -27,10 +23,11 @@ RojGari is a full-stack web application with three user roles: **job seekers**, 
 - **Three role-based experiences** (job seeker, company, admin) with separate dashboards and access rules
 - **Company verification workflow**: companies are reviewed by an admin before they are trusted on the platform
 - **Complete application lifecycle**: apply, track status, receive notifications
+- **Account security flows**: email verification (with resend), password reset by email and a lockout page for repeated failed logins
 - **Profile strength meter** that guides job seekers to complete their profile
 - **Secure resume handling**: resumes are served through a protected view, not exposed as open links
 - **Custom admin panel** with live statistics, filters, search and moderation actions (block users, deactivate jobs)
-- **Relational data model on MySQL 8** using the `utf8mb4` character set
+- **Relational data model** that runs on SQLite out of the box and on MySQL 8 when configured
 - **Responsive UI** built with Tailwind CSS
 
 ## Screenshots
@@ -54,7 +51,7 @@ RojGari is a full-stack web application with three user roles: **job seekers**, 
 ## Features
 
 ### Job seekers
-- Register, log in and manage a detailed profile: photo, headline, bio, contact, location, education, experience, skills, expected salary and preferred job type
+- Register, verify email, log in, reset a forgotten password and manage a detailed profile: photo, headline, bio, contact, location, education, experience, skills, expected salary and preferred job type
 - Skills displayed as tags
 - Upload a resume once and reuse it for every application
 - Search jobs by organization and filter by Full-time, Part-time, Internship or Remote
@@ -85,7 +82,7 @@ RojGari is a full-stack web application with three user roles: **job seekers**, 
 | --- | --- |
 | Language | Python 3 |
 | Framework | Django |
-| Database | MySQL 8 |
+| Database | SQLite (default) or MySQL 8 |
 | Frontend | Django Templates, Tailwind CSS |
 | Tooling | Git, GitHub, VS Code, npm |
 
@@ -97,7 +94,7 @@ flowchart LR
     T --> V[Django Views]
     V --> A[Auth and Role Checks]
     V --> M[Models / ORM]
-    M --> D[(MySQL)]
+    M --> D[(SQLite / MySQL)]
     V --> N[Notifications]
     V --> F[Media Storage: photos and resumes]
 ```
@@ -116,48 +113,123 @@ erDiagram
     USER ||--o{ NOTIFICATION : receives
 ```
 
-> This diagram is simplified. Adjust the entity names to match your `models.py`.
+## Engineering decisions
+
+| Decision | Why |
+| --- | --- |
+| Split the code into focused apps (`accounts`, `companies`, `jobseeker`, `jobs`, `applications`, `notifications`, `adminpanel`) | Each app owns one responsibility, which keeps models, views and tests easy to find |
+| Role checks in reusable decorators (`core/decorators.py`) | One place enforces who can open which page, instead of repeating checks in every view |
+| Notification logic in a service module (`notifications/services.py`) | Views stay thin and every event creates notifications the same way |
+| A context processor for the unread count | The navbar bell works on every page without extra code in each view |
+| Django signals to create profiles (`jobseeker/signals.py`, `companies/signals.py`) | A profile or company record is created automatically when a user registers |
+| Upload validators (`core/validators.py`) | Resumes and photos are checked before they are saved |
+| Environment-based configuration with a `.env.example` | No secrets in Git, and the database can switch between SQLite and MySQL without code changes |
+| Compiled Tailwind CSS committed in `static/css/output.css` | The site is styled right after cloning, without a Node build step |
 
 ## Project structure
 
 ```
 rojgari/
-├── core/             # Shared models, profiles, resume access
-├── jobs/             # Job listings, search, saved jobs
-├── applications/     # Applications and status tracking
-├── dashboard/        # Job seeker, company and admin dashboards
-├── notifications/    # In-app notifications
-├── templates/        # Django templates
-├── static/           # Tailwind source and compiled CSS
-├── screenshots/      # README images
+├── accounts/                 # Authentication and user accounts
+│   ├── emails.py             # Verification and account emails
+│   ├── forms.py              # Registration and login forms
+│   ├── signals.py            # Account-related signals
+│   ├── models.py             # Custom user model (roles, email verified)
+│   ├── views.py, urls.py
+│   └── migrations/
+├── adminpanel/               # Custom admin panel (overview, companies, users, jobs)
+│   ├── views.py, urls.py
+│   └── apps.py
+├── applications/             # Job applications and status tracking
+│   ├── models.py, forms.py
+│   ├── views.py, urls.py
+│   └── migrations/
+├── companies/                # Company profiles and admin verification
+│   ├── models.py, forms.py
+│   ├── signals.py
+│   └── migrations/
+├── config/                   # Project configuration
+│   ├── settings.py           # Settings (reads values from .env)
+│   ├── urls.py               # Root URL routes
+│   └── wsgi.py, asgi.py
+├── core/                     # Shared utilities
+│   ├── decorators.py         # Role-based access decorators
+│   ├── validators.py         # File upload validators
+│   ├── views.py, urls.py     # Home, about and protected resume access
+│   └── models.py
+├── dashboard/                # Job seeker and company dashboards
+│   ├── views.py, urls.py
+│   └── models.py
+├── jobs/                     # Job listings, search and saved jobs
+│   ├── models.py             # Job and SavedJob
+│   ├── forms.py
+│   ├── templatetags/         # Custom template filters (job_extras.py)
+│   ├── views.py, urls.py
+│   └── migrations/
+├── jobseeker/                # Job seeker profile
+│   ├── models.py, forms.py
+│   ├── signals.py            # Creates a profile for new job seekers
+│   └── views.py
+├── notifications/            # In-app notifications
+│   ├── models.py
+│   ├── services.py           # Creates notifications for events
+│   ├── context_processors.py # Unread count for the navbar bell
+│   └── views.py, urls.py
+├── templates/                # Django templates
+│   ├── base.html
+│   ├── accounts/             # Login, register, password reset, verification
+│   ├── adminpanel/           # Admin panel pages
+│   ├── applications/         # Apply, applicants, my applications
+│   ├── core/                 # Home and about
+│   ├── dashboard/            # Job seeker and company dashboards
+│   ├── includes/             # Navbar, hero and footer
+│   ├── jobs/                 # Job list, detail, form, saved jobs
+│   └── notifications/        # Notification list
+├── static/                   # Static assets
+│   ├── src/input.css         # Tailwind source
+│   ├── css/output.css        # Compiled Tailwind CSS
+│   ├── js/                   # navbar.js, home.js, swiper.js
+│   └── images/               # Logo, hero image and employer logos
+├── screenshots/              # README images
+├── .env.example              # Sample environment variables
+├── .gitignore
 ├── manage.py
-└── requirements.txt
+├── package.json              # Tailwind CSS tooling
+├── package-lock.json
+├── requirements.txt          # Python dependencies
+├── requirements-mysql.txt    # Optional MySQL driver
+└── README.md
 ```
 
-> Update this tree so it matches your actual folders.
+Files and folders that exist locally but are **not** in Git (listed in `.gitignore`): `.env`, `db.sqlite3`, `data.json`, `media/` (uploaded photos and resumes), `env/` and `venv_old/` (virtual environments) and `node_modules/`.
 
 ## Getting started
 
 ### Prerequisites
 - Python 3.10+
 - Node.js and npm (for Tailwind CSS)
-- MySQL 8
+- MySQL 8 (optional, SQLite is used by default)
 
 ### 1. Clone
 
 ```bash
-git clone https://github.com/YOUR_USERNAME/YOUR_REPO.git
-cd YOUR_REPO
+git clone https://github.com/YOUR_USERNAME/rojgari.git
+cd rojgari
 ```
 
-### 2. Create a virtual environment
+### 2. Create and activate a virtual environment
 
 ```bash
-python -m venv venv
-# Windows
-venv\Scripts\activate
+python -m venv env
+
+# Windows (PowerShell)
+.\env\Scripts\activate
+
+# Windows (CMD)
+env\Scripts\activate.bat
+
 # macOS / Linux
-source venv/bin/activate
+source env/bin/activate
 ```
 
 ### 3. Install dependencies
@@ -167,75 +239,44 @@ pip install -r requirements.txt
 npm install
 ```
 
-### 4. Configure the database
+### 4. Configure environment variables
 
-Create the database and user:
+Copy the example file and edit the values:
+
+```bash
+# Windows
+copy .env.example .env
+
+# macOS / Linux
+cp .env.example .env
+```
+
+Set a new `SECRET_KEY` in `.env`. You can generate one with:
+
+```bash
+python -c "from django.core.management.utils import get_random_secret_key; print(get_random_secret_key())"
+```
+
+### 5. (Optional) Use MySQL instead of SQLite
+
+By default the project uses SQLite, so you can skip this step. To use MySQL:
 
 ```sql
 CREATE DATABASE rojgari CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
-CREATE USER 'rojgari_user'@'localhost' IDENTIFIED BY 'your_strong_password';
-GRANT ALL PRIVILEGES ON rojgari.* TO 'rojgari_user'@'localhost';
-FLUSH PRIVILEGES;
 ```
 
 Install the MySQL driver:
 
 ```bash
-pip install mysqlclient
+pip install -r requirements-mysql.txt
 ```
 
-<details>
-<summary>mysqlclient fails to install?</summary>
-
-On Linux, install the build dependencies first:
-
-```bash
-sudo apt install python3-dev default-libmysqlclient-dev build-essential pkg-config
-```
-
-Or use PyMySQL instead:
-
-```bash
-pip install pymysql
-```
-
-and add to `settings.py`:
-
-```python
-import pymysql
-pymysql.install_as_MySQLdb()
-```
-</details>
-
-`settings.py`:
-
-```python
-import os
-
-DATABASES = {
-    "default": {
-        "ENGINE": "django.db.backends.mysql",
-        "NAME": os.environ.get("DB_NAME", "rojgari"),
-        "USER": os.environ.get("DB_USER", "rojgari_user"),
-        "PASSWORD": os.environ.get("DB_PASSWORD", ""),
-        "HOST": os.environ.get("DB_HOST", "127.0.0.1"),
-        "PORT": os.environ.get("DB_PORT", "3306"),
-        "OPTIONS": {"charset": "utf8mb4"},
-    }
-}
-```
-
-### 5. Environment variables
-
-Create a `.env` file in the project root (already in `.gitignore`):
+Then uncomment and fill in the database values in `.env`:
 
 ```
-SECRET_KEY=your-django-secret-key
-DEBUG=True
-
 DB_NAME=rojgari
-DB_USER=rojgari_user
-DB_PASSWORD=your_strong_password
+DB_USER=your_mysql_user
+DB_PASSWORD=your_mysql_password
 DB_HOST=127.0.0.1
 DB_PORT=3306
 ```
@@ -263,6 +304,18 @@ python manage.py runserver
 
 Open http://127.0.0.1:8000.
 
+## Environment variables
+
+| Variable | Purpose |
+| --- | --- |
+| `SECRET_KEY` | Django secret key. Keep it private. |
+| `DEBUG` | `True` for development, `False` in production |
+| `ALLOWED_HOSTS` | Comma-separated list of allowed hosts |
+| `DEFAULT_FROM_EMAIL` | Sender address for emails |
+| `DB_NAME`, `DB_USER`, `DB_PASSWORD`, `DB_HOST`, `DB_PORT` | Optional. MySQL settings. Leave out to use SQLite. |
+
+The real `.env` file is listed in `.gitignore` and is never committed. Use `.env.example` as a template.
+
 ## User roles
 
 | Role | Capabilities |
@@ -280,30 +333,36 @@ Open http://127.0.0.1:8000.
 
 ## Security practices
 
-- Secrets and database credentials are kept in environment variables, never committed
+- Secrets and database credentials live in environment variables and are never committed (`.env` is in `.gitignore`)
 - Django's built-in password hashing, CSRF protection and session handling
-- Role checks on dashboards and admin actions
-- Resumes are served through a protected endpoint
-- Admins can block abusive accounts and deactivate listings
+- Email verification for new accounts and a password reset flow
+- Lockout page after repeated failed login attempts
+- Role-based access checks on dashboards and admin actions
+- Resumes are served through a protected view, and uploads are validated
+- Admins can block accounts and deactivate listings
+- Companies must be verified by an admin before they are trusted on the platform
 
 ## Testing
+
+Each app contains a `tests.py` module. Run the full suite with:
 
 ```bash
 python manage.py test
 ```
 
-> Add tests for your key flows (registration, applying to a job, company verification) and list the coverage here.
+Run the tests of a single app:
+
+```bash
+python manage.py test accounts
+```
 
 ## Roadmap
 
-- [ ] Email notifications for application updates
 - [ ] Job alerts based on saved skills
 - [ ] Employer analytics (views and applications per job)
 - [ ] REST API with Django REST Framework
 - [ ] Docker setup and CI with GitHub Actions
 - [ ] Deployment with a live demo
-
-> Edit this list to reflect what you actually plan to build.
 
 ## What I learned
 
@@ -314,5 +373,10 @@ python manage.py test
 - Creating a responsive UI with Tailwind CSS
 - Writing clear documentation and using Git for version control
 
+## Contributing
 
+This is a personal portfolio project. Feedback, suggestions and bug reports are welcome. Please open an issue on GitHub.
 
+## License
+
+Distributed under the MIT License. See `LICENSE` for details.
